@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
     ],
   },
   // i18n is handled via App Router with [lang] segments
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/pl",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
