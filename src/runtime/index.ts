@@ -46,3 +46,27 @@ export {
   TONE_SYSTEM_HINTS,
   CTA_LABELS,
 } from "./engines/multilingual-runtime";
+
+// ── Context Layer Architecture (ETAP 6) ───────────────────
+export {
+  orchestrateContextLayers,
+  resolveContextLayers,
+  resolvePrimaryLayer,
+  contextRegistry,
+  checkVersionCompatibility,
+  CONTEXT_RUNTIME_VERSION,
+} from "../context-layers/index";
+export type {
+  ContextLayer,
+  CompositeContextLayer,
+  ContextResolutionRequest,
+  ContextLayerDomain,
+  ReasoningRule,
+  NegotiationHeuristic,
+  EscalationRule,
+  ExecutiveFramingEntry,
+  CapabilityGroundingEntry,
+} from "../context-layers/types";
+
+// ── Domain Contexts (auto-registers all layers on import) ─
+export { PROCUREMENT_ADVISORY_CONTEXT_V1 } from "../domain-contexts/index";

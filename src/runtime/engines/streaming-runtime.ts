@@ -2,7 +2,12 @@
 // CIC Runtime — Streaming Runtime
 // Builds enhanced system prompts from runtime orchestration
 // decisions. Used by the /api/runtime/stream endpoint.
-// ─────────────────────name───────────────────────────────────
+//
+// ETAP 6: Context Layer Architecture integrated.
+// System prompt now includes domain cognition contribution
+// from the Context Orchestrator (procurement reasoning,
+// negotiation intelligence, executive framing, etc.)
+// ─────────────────────────────────────────────────────────
 
 import type { OrchestrationResponse } from "../schemas/orchestration.schema";
 import type { RecommendationResponse } from "../schemas/recommendation.schema";
@@ -16,17 +21,23 @@ import {
   getUrgencyInstruction,
   TONE_SYSTEM_HINTS,
 } from "./multilingual-runtime";
+import type { CompositeContextLayer, ContextResolutionRequest } from "../../context-layers/types";
+import { orchestrateContextLayers } from "../../context-layers/orchestrator";
+// Ensure all domain context layers are registered at module load time
+import "../../domain-contexts/index";
 
 // ── System prompt builder ─────────────────────────────────
 /**
  * Builds a rich system prompt from runtime orchestration + personalization.
- * This replaces the static system prompt in /api/chat.
+ * Optionally accepts a pre-resolved CompositeContextLayer.
+ * If not provided, orchestrates one from the request parameters.
  */
 export function buildRuntimeSystemPrompt(
   locale: "pl" | "en",
   orchestration: OrchestrationResponse,
   personalization: PersonalizeResponse,
-  deploymentDescription?: string
+  deploymentDescription?: string,
+  contextLayer?: CompositeContextLayer
 ): string {
   const isPL = locale === "pl";
 
@@ -67,6 +78,23 @@ OPTIMIZATION LAYER:
 - Pause recommendations: ${orchestration.optimization.shouldPauseRecommendations}
 - Pause CTAs: ${orchestration.optimization.shouldPauseCTAs}`;
 
+  // ── Context Layer contribution ──────────────────────────
+  // Domain cognition from the Context Orchestrator.
+  // If a pre-resolved layer is passed, use it directly.
+  // Otherwise, orchestrate one from the orchestration context.
+  const resolvedContextLayer: CompositeContextLayer = contextLayer ?? orchestrateContextLayers({
+    deployment: "ci-profitia",
+    locale,
+    intent: orchestration.intent?.primary as ContextResolutionRequest["intent"],
+    urgency: orchestration.intent?.urgency as ContextResolutionRequest["urgency"],
+    maturity: orchestration.maturity?.level as ContextResolutionRequest["maturity"],
+    executiveRole: orchestration.personalization?.executiveRole as ContextResolutionRequest["executiveRole"],
+  });
+
+  const domainCognitionSection = resolvedContextLayer.systemPromptContribution
+    ? `\n${resolvedContextLayer.systemPromptContribution}`
+    : "";
+
   const behaviorRules = `
 YOUR ADVISORY BEHAVIOR:
 1. Never say "How can I help you?" — you're an advisor, not support staff
@@ -90,7 +118,7 @@ After understanding the situation, emit a JSON metadata block at the END of your
 {"intent": "I8_NEGOTIATIONS", "confidence": 0.85, "urgency": "U1", "phase": "capability_recommendation", "workshopProbability": 0.3, "discoveryReadiness": 0.6}
 \`\`\``;
 
-  return [baseIdentity, runtimeContext, behaviorRules].join("\n");
+  return [baseIdentity, runtimeContext, domainCognitionSection, behaviorRules].join("\n");
 }
 
 // ── Streaming event emitter helpers ──────────────────────
