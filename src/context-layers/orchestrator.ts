@@ -74,56 +74,56 @@ function renderSystemPromptContribution(
   if (reasoningRules.length > 0) {
     sections.push("\nADVISORY REASONING:");
     reasoningRules
-      .slice(0, 6)
+      .slice(0, 8)
       .forEach((r) => sections.push(`- ${r.systemPromptSnippet[locale]}`));
   }
 
   if (negotiationHeuristics.length > 0) {
     sections.push("\nNEGOTIATION INTELLIGENCE:");
     negotiationHeuristics
-      .slice(0, 5)
+      .slice(0, 8)
       .forEach((h) => sections.push(`- ${h.systemPromptSnippet[locale]}`));
   }
 
   if (supplierTactics.length > 0) {
     sections.push("\nSUPPLIER TACTICS TO RECOGNIZE:");
     supplierTactics
-      .slice(0, 4)
+      .slice(0, 8)
       .forEach((t) => sections.push(`- ${t.systemPromptSnippet[locale]}`));
   }
 
   if (leverageVectors.length > 0) {
     sections.push("\nLEVERAGE INTELLIGENCE:");
     leverageVectors
-      .slice(0, 3)
+      .slice(0, 6)
       .forEach((l) => sections.push(`- ${l.systemPromptSnippet[locale]}`));
   }
 
   if (baTNAIntelligence.length > 0) {
     sections.push("\nBATNA REASONING:");
     baTNAIntelligence
-      .slice(0, 2)
+      .slice(0, 4)
       .forEach((b) => sections.push(`- ${b.systemPromptSnippet[locale]}`));
   }
 
   if (concessionPatterns.length > 0) {
     sections.push("\nCONCESSION LOGIC:");
     concessionPatterns
-      .slice(0, 2)
+      .slice(0, 4)
       .forEach((c) => sections.push(`- ${c.systemPromptSnippet[locale]}`));
   }
 
   if (priceManipulation.length > 0) {
     sections.push("\nPRICE MANIPULATION DETECTION:");
     priceManipulation
-      .slice(0, 3)
+      .slice(0, 5)
       .forEach((p) => sections.push(`- ${p.systemPromptSnippet[locale]}`));
   }
 
   if (powerDynamics.length > 0) {
     sections.push("\nPOWER DYNAMICS:");
     powerDynamics
-      .slice(0, 2)
+      .slice(0, 4)
       .forEach((p) => sections.push(`- ${p.systemPromptSnippet[locale]}`));
   }
 

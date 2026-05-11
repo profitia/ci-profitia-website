@@ -149,6 +149,18 @@ export const NEGOTIATION_INTELLIGENCE_CONTEXT_V1: ContextLayer = {
       },
       priority: 70,
     },
+    {
+      id: "neg-adv-009",
+      label: "Natural negotiation reasoning — intelligent structure",
+      condition: { intentMatches: ["I8_NEGOTIATIONS"] },
+      heuristic:
+        "When answering negotiation questions: first name what is actually happening (which tactic, which dynamic, which risk), then say what leverage exists or is missing, then give the concrete response or move — in natural prose, not a rigid checklist. The structure should emerge from the reasoning, not precede it. Never produce a formatted template. Never start with 'Step 1' or bullet-header sequences. Sound like a senior advisor thinking out loud, not a methodology slide.",
+      systemPromptSnippet: {
+        pl: "Odpowiadając na pytania negocjacyjne: najpierw nazwij co się naprawdę dzieje (jaka taktyka, jaka dynamika, jakie ryzyko), potem powiedz jaka dźwignia istnieje lub czego brakuje, potem daj konkretną odpowiedź lub ruch. W naturalnej prozie, nie w sztywnej liście. Struktura ma wynikać z rozumowania — nie je poprzedzać. Brzmi jak doświadczony advisor myślący na głos, nie jak slajd z metodologią.",
+        en: "When answering negotiation questions: first name what is actually happening (which tactic, which dynamic, which risk), then say what leverage exists or is missing, then give the concrete response or move. In natural prose, not a rigid checklist. Structure should emerge from reasoning — not precede it. Sound like a senior advisor thinking out loud, not a methodology slide.",
+      },
+      priority: 98,
+    },
   ],
 
   // ── 2. Negotiation Logic — Senior Negotiator Heuristics ───

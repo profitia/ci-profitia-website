@@ -121,3 +121,63 @@ export const PHASE_LABELS: Record<string, Record<SupportedLocale, string>> = {
 export function getPhaseLabel(phase: string, locale: SupportedLocale): string {
   return PHASE_LABELS[phase]?.[locale] ?? phase;
 }
+
+// ── Language dominance detection ─────────────────────────
+// Used to determine the actual language a user is writing in,
+// independent of the page locale setting. Drives language-matching
+// in conversational contexts where the user may switch languages.
+
+// Polish signals: diacritics and common particles/prepositions
+const PL_SIGNALS = /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|\b(że|czy|jak|co|się|nie|ale|dla|przy|przez|więc|jednak|mam|mamy|jest|są|był|była|tego|tej|ten|ta|to|ze|za|po|na|do|od|we|bo|już)\b/gi;
+
+// English signals: common EN words that don't appear in Polish
+const EN_SIGNALS = /\b(the|is|are|was|were|have|has|had|will|would|can|could|should|that|this|with|from|they|their|there|what|when|how|why|our|your|my|we|you|he|she|it|also|just|only|very|really|need|want|get|make|know|think|work|help|give|take)\b/gi;
+
+// Terms that are valid in both languages (procurement/negotiation jargon)
+export const UNTRANSLATABLE_PROCUREMENT_TERMS = [
+  "benchmark", "BATNA", "leverage", "should-cost", "RFQ", "RFP", "eAuction",
+  "TCO", "EBIT", "ROI", "KPI", "SLA", "CPO", "CFO", "CEO", "MD", "CAGR",
+  "Kraljic", "category", "procurement", "sourcing", "supplier", "vendor",
+  "contract", "spend", "savings", "pipeline", "negotiation", "stakeholder",
+];
+
+/**
+ * Detects the dominant language of a text message.
+ * Returns "pl" if Polish signals constitute ≥40% of total signal count,
+ * otherwise returns "en". Ignores untranslatable procurement terms.
+ */
+export function detectLanguageDominance(text: string): SupportedLocale {
+  if (!text || text.trim().length < 10) return "pl"; // default for very short messages
+
+  const plMatches = (text.match(PL_SIGNALS) ?? []).length;
+  const enMatches = (text.match(EN_SIGNALS) ?? []).length;
+  const total = plMatches + enMatches;
+
+  if (total === 0) return "pl"; // no clear signals → assume default
+  const plRatio = plMatches / total;
+
+  return plRatio >= 0.4 ? "pl" : "en";
+}
+
+/**
+ * Detects language from a full conversation (all user messages combined).
+ * Gives higher weight to the most recent message.
+ */
+export function detectConversationLanguageDominance(
+  messages: Array<{ role: string; content: string }>
+): SupportedLocale {
+  const userMessages = messages.filter((m) => m.role === "user");
+  if (userMessages.length === 0) return "pl";
+
+  // Weight: last message 2x, rest 1x
+  const last = userMessages[userMessages.length - 1];
+  const rest = userMessages.slice(0, -1);
+
+  const combinedText = [
+    ...rest.map((m) => m.content),
+    last.content,
+    last.content, // double-weight for last message
+  ].join(" ");
+
+  return detectLanguageDominance(combinedText);
+}

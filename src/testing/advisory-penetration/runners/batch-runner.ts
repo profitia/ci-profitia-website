@@ -27,22 +27,22 @@ function buildRunList(options: RunOptions): AdvisoryScenario[] {
 // ── Server health check ───────────────────────────────────
 
 async function checkServerHealth(baseUrl: string): Promise<boolean> {
-  try {
-    const response = await fetch(`${baseUrl}/api/health`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    return response.ok;
-  } catch {
-    // Try the root if /api/health doesn't exist
+  // Any HTTP response (even 3xx/4xx) means the server is up
+  const endpoints = [`${baseUrl}/api/chat`, `${baseUrl}/api/health`, baseUrl];
+  for (const url of endpoints) {
     try {
-      const response = await fetch(baseUrl, {
+      const response = await fetch(url, {
+        method: "HEAD",
         signal: AbortSignal.timeout(5000),
+        redirect: "manual",
       });
-      return response.ok;
+      // status 0 = opaque redirect, any numeric status = server is up
+      if (response.status >= 0) return true;
     } catch {
-      return false;
+      // connection refused or timeout — try next endpoint
     }
   }
+  return false;
 }
 
 // ── Main batch runner ─────────────────────────────────────
