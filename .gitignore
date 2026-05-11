@@ -4,3 +4,9 @@ node_modules/
 .env
 dist/
 *.tsbuildinfo
+
+# Penetration test output (keep folders, ignore contents)
+src/testing/advisory-penetration/transcripts/*
+!src/testing/advisory-penetration/transcripts/.gitkeep
+src/testing/advisory-penetration/reports/*
+!src/testing/advisory-penetration/reports/.gitkeep
