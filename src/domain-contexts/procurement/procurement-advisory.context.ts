@@ -506,4 +506,18 @@ export const PROCUREMENT_ADVISORY_CONTEXT_V1: ContextLayer = {
     "Architecture must remain iterative, deployment-agnostic and multilingual-ready.",
     "Every capability recommendation must be problem-first, not product-first.",
   ],
+
+  // ── 10. ETAP 7 Negotiation Cognition Fields ───────────────
+  // Procurement advisory context does not define negotiation-specific
+  // cognition — that is owned by negotiation-intelligence-v1 (priority 85).
+  // These empty arrays ensure type compatibility.
+  supplierTactics: [],
+  leverageVectors: [],
+  bATNAIntelligence: [],
+  concessionPatterns: [],
+  priceManipulationPatterns: [],
+  powerDynamics: [],
+  negotiationSequencing: [],
+  negotiationDiagnostics: [],
 };
+

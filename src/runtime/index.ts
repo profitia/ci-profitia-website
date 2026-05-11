@@ -66,7 +66,19 @@ export type {
   EscalationRule,
   ExecutiveFramingEntry,
   CapabilityGroundingEntry,
+  // ETAP 7
+  SupplierTacticPattern,
+  LeverageVector,
+  BATNAIntelligenceEntry,
+  ConcessionPattern,
+  PriceManipulationPattern,
+  PowerDynamicsEntry,
+  NegotiationSequenceRule,
+  NegotiationDiagnostic,
+  RegionalAdvisoryTone,
 } from "../context-layers/types";
 
 // ── Domain Contexts (auto-registers all layers on import) ─
 export { PROCUREMENT_ADVISORY_CONTEXT_V1 } from "../domain-contexts/index";
+export { NEGOTIATION_INTELLIGENCE_CONTEXT_V1 } from "../domain-contexts/index";
+

@@ -23,6 +23,14 @@ import type {
   PsychologyEntry,
   ShouldCostEntry,
   CapabilityGroundingEntry,
+  SupplierTacticPattern,
+  LeverageVector,
+  BATNAIntelligenceEntry,
+  ConcessionPattern,
+  PriceManipulationPattern,
+  PowerDynamicsEntry,
+  NegotiationSequenceRule,
+  NegotiationDiagnostic,
 } from "./types";
 import { resolveContextLayers } from "./loader";
 import { conditionMatches } from "./loader";
@@ -49,11 +57,19 @@ function renderSystemPromptContribution(
   shouldCost: ShouldCostEntry[],
   capabilities: CapabilityGroundingEntry[],
   principles: string[],
+  supplierTactics: SupplierTacticPattern[],
+  leverageVectors: LeverageVector[],
+  baTNAIntelligence: BATNAIntelligenceEntry[],
+  concessionPatterns: ConcessionPattern[],
+  priceManipulation: PriceManipulationPattern[],
+  powerDynamics: PowerDynamicsEntry[],
+  negotiationSequencing: NegotiationSequenceRule[],
+  negotiationDiagnostics: NegotiationDiagnostic[],
   locale: "pl" | "en"
 ): string {
   const sections: string[] = [];
 
-  sections.push("DOMAIN COGNITION CONTEXT (Procurement Advisory Layer v1):");
+  sections.push("DOMAIN COGNITION CONTEXT (Procurement & Negotiation Intelligence v1):");
 
   if (reasoningRules.length > 0) {
     sections.push("\nADVISORY REASONING:");
@@ -65,8 +81,64 @@ function renderSystemPromptContribution(
   if (negotiationHeuristics.length > 0) {
     sections.push("\nNEGOTIATION INTELLIGENCE:");
     negotiationHeuristics
-      .slice(0, 4)
+      .slice(0, 5)
       .forEach((h) => sections.push(`- ${h.systemPromptSnippet[locale]}`));
+  }
+
+  if (supplierTactics.length > 0) {
+    sections.push("\nSUPPLIER TACTICS TO RECOGNIZE:");
+    supplierTactics
+      .slice(0, 4)
+      .forEach((t) => sections.push(`- ${t.systemPromptSnippet[locale]}`));
+  }
+
+  if (leverageVectors.length > 0) {
+    sections.push("\nLEVERAGE INTELLIGENCE:");
+    leverageVectors
+      .slice(0, 3)
+      .forEach((l) => sections.push(`- ${l.systemPromptSnippet[locale]}`));
+  }
+
+  if (baTNAIntelligence.length > 0) {
+    sections.push("\nBATNA REASONING:");
+    baTNAIntelligence
+      .slice(0, 2)
+      .forEach((b) => sections.push(`- ${b.systemPromptSnippet[locale]}`));
+  }
+
+  if (concessionPatterns.length > 0) {
+    sections.push("\nCONCESSION LOGIC:");
+    concessionPatterns
+      .slice(0, 2)
+      .forEach((c) => sections.push(`- ${c.systemPromptSnippet[locale]}`));
+  }
+
+  if (priceManipulation.length > 0) {
+    sections.push("\nPRICE MANIPULATION DETECTION:");
+    priceManipulation
+      .slice(0, 3)
+      .forEach((p) => sections.push(`- ${p.systemPromptSnippet[locale]}`));
+  }
+
+  if (powerDynamics.length > 0) {
+    sections.push("\nPOWER DYNAMICS:");
+    powerDynamics
+      .slice(0, 2)
+      .forEach((p) => sections.push(`- ${p.systemPromptSnippet[locale]}`));
+  }
+
+  if (negotiationSequencing.length > 0) {
+    const currentStage = negotiationSequencing[0];
+    sections.push(`\nNEGOTIATION STAGE:\n- ${currentStage.systemPromptSnippet[locale]}`);
+  }
+
+  if (negotiationDiagnostics.length > 0) {
+    sections.push("\nDIAGNOSTIC QUESTIONS (max 2 per interaction):");
+    const diag = negotiationDiagnostics[0];
+    sections.push(`- Primary: ${diag.questions.primary[locale]}`);
+    if (diag.questions.secondary) {
+      sections.push(`- Secondary (if needed): ${diag.questions.secondary[locale]}`);
+    }
   }
 
   if (shouldCost.length > 0) {
@@ -103,7 +175,7 @@ function renderSystemPromptContribution(
 
   if (principles.length > 0) {
     sections.push("\nSTRATEGIC PRINCIPLES:");
-    principles.slice(0, 3).forEach((p) => sections.push(`- ${p}`));
+    principles.slice(0, 4).forEach((p) => sections.push(`- ${p}`));
   }
 
   return sections.join("\n");
@@ -131,13 +203,21 @@ export function orchestrateContextLayers(
       activeShouldCostEntries: [],
       activeCapabilityGrounding: [],
       strategicPrinciples: [],
+      activeSupplierTactics: [],
+      activeLeverageVectors: [],
+      activeBATNAIntelligence: [],
+      activeConcessionPatterns: [],
+      activePriceManipulationPatterns: [],
+      activePowerDynamics: [],
+      activeNegotiationSequencing: [],
+      activeNegotiationDiagnostics: [],
       systemPromptContribution: "",
       resolvedAt: Date.now(),
       locale: req.locale,
     };
   }
 
-  // Accumulators
+  // Accumulators — ETAP 6
   const seenRuleIds = new Set<string>();
   const activeReasoningRules: ReasoningRule[] = [];
 
@@ -159,6 +239,31 @@ export function orchestrateContextLayers(
   const activeCapabilityGrounding: CapabilityGroundingEntry[] = [];
 
   const strategicPrinciples: string[] = [];
+
+  // Accumulators — ETAP 7
+  const seenTacticIds = new Set<string>();
+  const activeSupplierTactics: SupplierTacticPattern[] = [];
+
+  const seenLeverageIds = new Set<string>();
+  const activeLeverageVectors: LeverageVector[] = [];
+
+  const seenBATNAIds = new Set<string>();
+  const activeBATNAIntelligence: BATNAIntelligenceEntry[] = [];
+
+  const seenConcessionIds = new Set<string>();
+  const activeConcessionPatterns: ConcessionPattern[] = [];
+
+  const seenPriceManipIds = new Set<string>();
+  const activePriceManipulationPatterns: PriceManipulationPattern[] = [];
+
+  const seenPowerIds = new Set<string>();
+  const activePowerDynamics: PowerDynamicsEntry[] = [];
+
+  const seenSeqIds = new Set<string>();
+  const activeNegotiationSequencing: NegotiationSequenceRule[] = [];
+
+  const seenDiagIds = new Set<string>();
+  const activeNegotiationDiagnostics: NegotiationDiagnostic[] = [];
 
   for (const layer of layers) {
     // ── Advisory reasoning rules ──────────────────────────
@@ -243,6 +348,80 @@ export function orchestrateContextLayers(
         strategicPrinciples.push(principle);
       }
     }
+
+    // ── ETAP 7: Supplier tactics ──────────────────────────
+    const sortedTactics = [...layer.supplierTactics].sort(
+      (a, b) => b.priority - a.priority
+    );
+    for (const t of sortedTactics) {
+      if (!seenTacticIds.has(t.id)) {
+        seenTacticIds.add(t.id);
+        activeSupplierTactics.push(t);
+      }
+    }
+
+    // ── ETAP 7: Leverage vectors — condition-filtered ─────
+    for (const l of layer.leverageVectors) {
+      if (seenLeverageIds.has(l.id)) continue;
+      if (ruleMatches(l.activationCondition, req)) {
+        seenLeverageIds.add(l.id);
+        activeLeverageVectors.push(l);
+      }
+    }
+
+    // ── ETAP 7: BATNA intelligence ────────────────────────
+    for (const b of layer.bATNAIntelligence) {
+      if (!seenBATNAIds.has(b.id)) {
+        seenBATNAIds.add(b.id);
+        activeBATNAIntelligence.push(b);
+      }
+    }
+
+    // ── ETAP 7: Concession patterns ───────────────────────
+    for (const c of layer.concessionPatterns) {
+      if (!seenConcessionIds.has(c.id)) {
+        seenConcessionIds.add(c.id);
+        activeConcessionPatterns.push(c);
+      }
+    }
+
+    // ── ETAP 7: Price manipulation patterns ───────────────
+    for (const p of layer.priceManipulationPatterns) {
+      if (!seenPriceManipIds.has(p.id)) {
+        seenPriceManipIds.add(p.id);
+        activePriceManipulationPatterns.push(p);
+      }
+    }
+
+    // ── ETAP 7: Power dynamics ────────────────────────────
+    for (const p of layer.powerDynamics) {
+      if (!seenPowerIds.has(p.id)) {
+        seenPowerIds.add(p.id);
+        activePowerDynamics.push(p);
+      }
+    }
+
+    // ── ETAP 7: Negotiation sequencing — condition-filtered
+    for (const s of layer.negotiationSequencing) {
+      if (seenSeqIds.has(s.id)) continue;
+      if (ruleMatches(s.condition, req)) {
+        seenSeqIds.add(s.id);
+        activeNegotiationSequencing.push(s);
+      }
+    }
+
+    // ── ETAP 7: Negotiation diagnostics — intent-filtered ─
+    for (const d of layer.negotiationDiagnostics) {
+      if (seenDiagIds.has(d.id)) continue;
+      const intentOk =
+        d.triggerIntents.length === 0 ||
+        !req.intent ||
+        d.triggerIntents.includes(req.intent);
+      if (intentOk) {
+        seenDiagIds.add(d.id);
+        activeNegotiationDiagnostics.push(d);
+      }
+    }
   }
 
   const systemPromptContribution = renderSystemPromptContribution(
@@ -254,6 +433,14 @@ export function orchestrateContextLayers(
     activeShouldCostEntries,
     activeCapabilityGrounding,
     strategicPrinciples,
+    activeSupplierTactics,
+    activeLeverageVectors,
+    activeBATNAIntelligence,
+    activeConcessionPatterns,
+    activePriceManipulationPatterns,
+    activePowerDynamics,
+    activeNegotiationSequencing,
+    activeNegotiationDiagnostics,
     req.locale
   );
 
@@ -267,6 +454,14 @@ export function orchestrateContextLayers(
     activeShouldCostEntries,
     activeCapabilityGrounding,
     strategicPrinciples,
+    activeSupplierTactics,
+    activeLeverageVectors,
+    activeBATNAIntelligence,
+    activeConcessionPatterns,
+    activePriceManipulationPatterns,
+    activePowerDynamics,
+    activeNegotiationSequencing,
+    activeNegotiationDiagnostics,
     systemPromptContribution,
     resolvedAt: Date.now(),
     locale: req.locale,

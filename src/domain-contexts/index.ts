@@ -13,14 +13,18 @@
 
 import { contextRegistry } from "../context-layers/registry";
 import { PROCUREMENT_ADVISORY_CONTEXT_V1 } from "./procurement";
+import { NEGOTIATION_INTELLIGENCE_CONTEXT_V1 } from "./negotiation";
 
 // ── Register all domain context layers ───────────────────
-// Add future layers below this line.
+// Registration order does NOT determine priority —
+// each ContextLayer carries its own priority: number field.
 
 contextRegistry.register(PROCUREMENT_ADVISORY_CONTEXT_V1);
+contextRegistry.register(NEGOTIATION_INTELLIGENCE_CONTEXT_V1);
 
 // ── Exports ───────────────────────────────────────────────
 export { PROCUREMENT_ADVISORY_CONTEXT_V1 } from "./procurement";
+export { NEGOTIATION_INTELLIGENCE_CONTEXT_V1 } from "./negotiation";
 
 // Registry stats (for health endpoints / debug)
 export { contextRegistry } from "../context-layers/registry";
