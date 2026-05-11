@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ci-profitia-website
+    runtime: node
+    region: frankfurt
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npx next start -p $PORT
+    healthCheckPath: /api/runtime/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_RUNTIME_URL
+        value: ""
