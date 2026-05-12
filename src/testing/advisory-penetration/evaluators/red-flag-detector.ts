@@ -91,6 +91,82 @@ const VAGUE_RECOMMENDATION_PHRASES: Array<[RegExp, "low" | "medium" | "high" | "
   [/trudno powiedzieć bez dokładnych danych/i, "low"],
 ];
 
+// ── ETAP 8.5 — New detection patterns ────────────────────
+
+// Consulting deck / over-structured format (AI smell)
+const CONSULTING_STRUCTURE_PATTERNS: Array<[RegExp, "low" | "medium" | "high" | "critical"]> = [
+  [/^#+\s*\*\*\w/m, "high"],           // ## **Header**
+  [/^\d+\.\s+\*\*[^*]+\*\*:/m, "high"], // 1. **Subject**: text
+  [/kluczowe kroki/i, "high"],
+  [/oto kilka/i, "high"],
+  [/poniżej kilka/i, "high"],
+  [/należy rozważyć/i, "medium"],
+  [/zalecam rozważenie/i, "high"],
+  [/warto wziąć pod uwagę/i, "medium"],
+  [/istnieje kilka strategii/i, "high"],
+  [/key considerations/i, "high"],
+  [/important to note/i, "medium"],
+  [/it's worth noting/i, "medium"],
+  [/it is important to/i, "medium"],
+  [/let me outline/i, "medium"],
+];
+
+// AI empathy phrases (ETAP 8.5 — replacing with executive empathy)
+const AI_EMPATHY_PATTERNS: Array<[RegExp, "low" | "medium" | "high" | "critical"]> = [
+  [/i understand your concern/i, "high"],
+  [/that sounds difficult/i, "high"],
+  [/i'm sorry you're dealing with/i, "high"],
+  [/rozumiem że to trudne/i, "high"],
+  [/rozumiem Twoją sytuację/i, "high"],
+  [/to musi być stresujące/i, "high"],
+  [/that must be stressful/i, "high"],
+  [/i can imagine how/i, "medium"],
+  [/wyobrażam sobie jak/i, "medium"],
+];
+
+// Templated CTA (over-used pattern)
+const TEMPLATED_CTA_PATTERNS: Array<[RegExp, "low" | "medium" | "high" | "critical"]> = [
+  [/kolejny krok to 20-minutowa rozmowa/i, "medium"],
+  [/the next step is a 20-minute conversation/i, "medium"],
+  [/bez zobowiązań/i, "low"],
+  [/no commitment/i, "low"],
+];
+
+// Tension/pressure realism — positive signals (NOT red flags, used for humanTensionScore)
+export const TENSION_REALISM_SIGNALS = [
+  /blef/i,
+  /zakotwiczenie/i,
+  /presja terminowa/i,
+  /sztuczna/i,
+  /dostawca (wie|próbuje|eskalował)/i,
+  /nie odpowiadał(bym|abym)/i,
+  /łatwo przepłacić/i,
+  /ryzyko (jest|robi się)/i,
+  /widzę gdzie/i,
+  /presję kwartalną/i,
+  /skrócić czas (na|decyzji)/i,
+  /bluff/i,
+  /anchor/i,
+  /deadline pressure/i,
+  /supplier .{0,20}(trying|knows|escalated)/i,
+  /wouldn't respond/i,
+  /overpaying happens/i,
+];
+
+// Human realism signals — positive (for humanRealismScore)
+export const HUMAN_REALISM_SIGNALS = [
+  // Blunt opening (no preamble)
+  /^(To|Ten|Tu|Tak|Nie|Tak\.|Nie\.|Uwaga|Klasyczne|Blef|Problem|Pytanie|Odpowiedź)[^:]/m,
+  /^(This|That|Here|The|No\.|Yes\.|Look|Classic|Problem|Wait)[^:]/m,
+  // Incomplete reasoning (deliberately open)
+  /\.\.\./,
+  // Short diagnostic questions
+  /\?\s*$/m,
+  // Direct blunt statements
+  /\. Nie (ruszaj|odpowiadaj|daj|zgadzaj)/i,
+  /\. Don't (respond|give|agree|move)/i,
+];
+
 // ── Core Detection Function ───────────────────────────────
 
 export function detectRedFlags(
@@ -259,7 +335,7 @@ export function detectRedFlags(
     }
   }
 
-  // 13. No business framing
+  // 13. No business framing — low priority flag (ETAP 8.5: not always required)
   const businessFramingPattern = /marż|EBIT|cash|koszt|savings|oszczędności|margin|PLN|€|revenue|przychód/i;
   if (!businessFramingPattern.test(resp)) {
     flags.push({
@@ -268,6 +344,43 @@ export function detectRedFlags(
       detail: "Response lacks any business/financial framing.",
       turnIndex: -1,
     });
+  }
+
+  // 14. ETAP 8.5 — Consulting deck / over-structured format (AI smell)
+  for (const [pattern, severity] of CONSULTING_STRUCTURE_PATTERNS) {
+    if (pattern.test(resp)) {
+      flags.push({
+        type: "consulting_deck_format",
+        severity,
+        detail: `Consulting deck format detected: ${pattern.source}`,
+        turnIndex: -1,
+      });
+      break; // only flag once per response
+    }
+  }
+
+  // 15. ETAP 8.5 — AI empathy phrases
+  for (const [pattern, severity] of AI_EMPATHY_PATTERNS) {
+    if (pattern.test(resp)) {
+      flags.push({
+        type: "ai_empathy_phrase",
+        severity,
+        detail: `AI empathy phrase detected: ${pattern.source}`,
+        turnIndex: -1,
+      });
+    }
+  }
+
+  // 16. ETAP 8.5 — Templated CTA
+  for (const [pattern, severity] of TEMPLATED_CTA_PATTERNS) {
+    if (pattern.test(resp)) {
+      flags.push({
+        type: "templated_cta",
+        severity,
+        detail: `Templated CTA phrase detected: ${pattern.source}`,
+        turnIndex: -1,
+      });
+    }
   }
 
   return flags;

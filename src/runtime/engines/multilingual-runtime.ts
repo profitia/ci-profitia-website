@@ -52,8 +52,8 @@ export const TONE_SYSTEM_HINTS: Record<string, Record<SupportedLocale, string>> 
     en: "Use data language: benchmarks, numbers, facts. Be precise and specific.",
   },
   strategic: {
-    pl: "Mów językiem strategii: frameworki, category thinking, najlepsze praktyki. Peer-to-peer.",
-    en: "Use strategic language: frameworks, category thinking, best practices. Peer-to-peer level.",
+    pl: "Mów językiem strategii: category architecture, portfolio sourcing, zmiana modelu operacyjnego. Peer-to-peer — bez slajdów konsultingowych.",
+    en: "Use strategic language: category architecture, sourcing portfolio, operating model. Peer-to-peer — no consulting slide tone.",
   },
   executive: {
     pl: "Mów językiem zarządu: wpływ na marżę, EBIT, ryzyko, cash flow, przewidywalność. Bez zbędnych szczegółów operacyjnych.",
@@ -84,8 +84,8 @@ export function getCTALabel(ctaType: string, locale: SupportedLocale): string {
 // ── Multilingual system prompt instructions ───────────────
 export function getMultilingualInstruction(locale: SupportedLocale): string {
   return locale === "pl"
-    ? "Odpowiadaj wyłącznie po polsku, dostosuj styl do rozmówcy, używaj formalnego 'Pan/Pani' chyba że kontekst wskazuje inaczej."
-    : "Respond in English only. Use professional but human tone. Avoid overly formal language.";
+    ? "Odpowiadaj po polsku. Styl: bezpośredni, konkretny, bez korporacyjnego poleru. Nie tłumacz: benchmark, leverage, BATNA, sourcing, should-cost, RFQ. Mieszany słownik (polskie zdanie + angielski termin) jest naturalny. Unikaj otwierania odpowiedzi od struktur listy z nagłówkami."
+    : "Respond in English. Direct, practitioner tone — no corporate polish. No consulting-deck structure (numbered headers). Mixed EN/PL procurement terminology is expected and natural.";
 }
 
 // ── Locale-aware urgency messaging ────────────────────────

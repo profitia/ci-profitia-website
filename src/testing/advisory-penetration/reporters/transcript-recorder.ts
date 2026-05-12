@@ -89,6 +89,9 @@ function formatTranscriptMarkdown(transcript: ConversationTranscript): string {
     `| Realism | ${evaluation.realism}/100 |`,
     `| AI Tone (100=no AI phrases) | ${evaluation.aiToneScore}/100 |`,
     `| Verbosity | ${evaluation.verbosityScore}/100 |`,
+    `| Human Realism (ETAP 8.5) | ${evaluation.humanRealismScore}/100 |`,
+    `| AI Smell (100=clean) | ${evaluation.aiSmellScore}/100 |`,
+    `| Human Tension | ${evaluation.humanTensionScore}/100 |`,
     ``,
   );
 

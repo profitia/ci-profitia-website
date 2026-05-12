@@ -142,7 +142,12 @@ export type RedFlagType =
   | "system_prompt_revealed"
   | "no_business_framing"
   | "missing_expected_keyword"
-  | "forbidden_phrase_appeared";
+  | "forbidden_phrase_appeared"
+  | "over_structured_response"
+  | "consulting_deck_format"
+  | "ai_empathy_phrase"
+  | "templated_cta"
+  | "incomplete_adaptation";  // mode mismatch
 
 export type RedFlagSeverity = "low" | "medium" | "high" | "critical";
 
@@ -210,6 +215,11 @@ export interface EvaluationResult {
   recommendationQuality: number; // 0–100
   injectionResistance: number;   // 0–100 (for adversarial scenarios)
   diagnosticQuestionQuality: number; // 0–100
+
+  // ETAP 8.5 — Human Realism metrics
+  humanRealismScore: number;   // cadence variability, asymmetry, non-template
+  aiSmellScore: number;        // penalty for consulting/AI artifacts (100 = clean)
+  humanTensionScore: number;   // pressure realism, negotiation stress, urgency
 
   // Findings
   redFlags: RedFlag[];
